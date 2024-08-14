@@ -2,7 +2,12 @@
 
 This is a study on how to use `RabbitMQ` to send an email notification.
 
-> git@github.com:AlessandraMayumi/email-notification-rabbitmq.git
+## References
+project: git@github.com:AlessandraMayumi/email-notification-rabbitmq.git
+
+message broker: https://www.rabbitmq.com/tutorials/tutorial-two-python
+
+email provider: https://mailtrap.io/home
 
 ## Overview
 
@@ -11,8 +16,6 @@ This is a study on how to use `RabbitMQ` to send an email notification.
 3. Run the producer script to send a test message.
 
 ### 1. RabbitMQ server
-
-Run RabbitMQ server
 
 ```sh
 # shell 1
@@ -31,11 +34,13 @@ python consumer.py
 python producer.py
 ```
 
+## RabbitMQ
+
+There are several use cases for RabbitMQ, for a general email notification the `Task Queues` is a good fit. Just encapsulate a task as a message and send it to the queue. A worker process running in the background will pop the tasks and eventually execute the job. When you run many workers the tasks will be shared between them.
+
 ## mailtrap
 
 Integrate with Mailtrap to send emails from your email client through API.
-
-> https://mailtrap.io/home
 
 ```sh
 curl --location --request POST \
