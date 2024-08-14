@@ -1,4 +1,35 @@
+# Project
+
+This is a study on how to use `RabbitMQ` to send an email notification.
+
 > git@github.com:AlessandraMayumi/email-notification-rabbitmq.git
+
+## Overview
+
+1. Start RabbitMQ server if it's not running.
+2. Run the consumer script to start listening for messages.
+3. Run the producer script to send a test message.
+
+### 1. RabbitMQ server
+
+Run RabbitMQ server
+
+```sh
+# shell 1
+docker run -it --rm --name rabbitmq -p 5672:5672 rabbitmq:latest
+```
+
+### 2. Consumer
+```sh
+# shell 2
+python consumer.py
+```
+
+### 3. Producer
+```sh
+# shell 3
+python producer.py
+```
 
 ## mailtrap
 
@@ -14,26 +45,18 @@ curl --location --request POST \
 --data-raw '{"from":{"email":"mailtrap@example.com","name":"Mailtrap Test"},"to":[{"email":"alessandra_mms@hotmail.com"}],"subject":"You are awesome!","text":"Congrats for sending test email with Mailtrap!","category":"Integration Test"}'
 ```
 
-## RabbitMQ
-
-Run RabbitMQ server
-
+## Useful commands
 ```sh
-docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:latest
-```
-
-## Run Your Scripts
-
-- Producer (Email Sender)
-- Consumer (Email Processor)
-
-1. Start RabbitMQ server if it's not running.
-2. Run the consumer script to start listening for messages.
-3. Run the producer script to send a test message.
-
-## Development
-```sh
+# PYTHON
+# create virtual environment
+python3 -m venv venv
+source venv/bin/activate
+# install requirements
+pip install -r requirements.txt
+# pip freeze
 pip freeze > requirements.txt
-# test email
-python client.py
+# DOCKER
+docker ps -a
+docker stop [CONTAINER_ID]
+docker rm [CONTAINER_ID]
 ```

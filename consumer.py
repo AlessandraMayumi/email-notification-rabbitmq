@@ -1,51 +1,31 @@
+#!/usr/bin/env python
 import pika
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-import json
+from config import Config
+from email_client import EmailClient
 
-# Function to send an email
-def send_email(recipient, subject, body):
-    # Replace these with your email provider's SMTP settings
-    smtp_server = 'smtp.example.com'
-    smtp_port = 587
-    smtp_username = 'your_username'
-    smtp_password = 'your_password'
-    
-    sender_email = 'your_email@example.com'
-
-    # Create the email message
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = recipient
-    msg['Subject'] = subject
-    msg.attach(MIMEText(body, 'plain'))
-
-    try:
-        # Connect to the SMTP server and send the email
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()
-            server.login(smtp_username, smtp_password)
-            server.sendmail(sender_email, recipient, msg.as_string())
-        print(f"Email sent to {recipient} with subject '{subject}'")
-    except Exception as e:
-        print(f"Failed to send email to {recipient}. Error: {e}")
-
-# Connect to RabbitMQ server
-connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+# Initialize RabbitMQ connection and declare queue
+connection = pika.BlockingConnection(
+    pika.ConnectionParameters(host=Config.QUEUE_HOST)
+    )
 channel = connection.channel()
+channel.queue_declare(queue=Config.QUEUE_NAME, durable=True)
 
-# Declare a queue
-channel.queue_declare(queue='email_queue')
+print(' [consumer] Waiting for messages. To exit press CTRL+C')
 
 def callback(ch, method, properties, body):
-    message = json.loads(body)
-    recipient = message['recipient']
-    subject = message['subject']
-    body = message['body']
-    send_email(recipient, subject, body)
+    print(f" [consumer] Received { body.decode() }, { properties }")
+    email_client = EmailClient()
+    email_client.send_email()
+    print(" [consumer] Done")
+    ch.basic_ack(delivery_tag=method.delivery_tag)
 
-channel.basic_consume(queue='email_queue', on_message_callback=callback, auto_ack=True)
+# This uses the basic.qos protocol method to tell RabbitMQ not to give more than one message to a worker at a time.
+channel.basic_qos(prefetch_count=1)
+channel.basic_consume(queue=Config.QUEUE_NAME, on_message_callback=callback)
 
-print(' [*] Waiting for messages. To exit press CTRL+C')
-channel.start_consuming()
+try:
+    channel.start_consuming()
+except KeyboardInterrupt:
+    print(" [consumer] Exiting...")
+finally:
+    connection.close()

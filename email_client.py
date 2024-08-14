@@ -1,14 +1,12 @@
+#!/usr/bin/env python
 import requests
 import json
-from dotenv import load_dotenv
-from os import getenv
-
-load_dotenv('.env')
+from config import Config
 
 class EmailClient:
     def __init__(self):
-        self.api_url = getenv('API_URL')
-        self.api_key = getenv('API_KEY')
+        self.api_url = Config.MAIL_API_URL
+        self.api_key = Config.MAIL_API_KEY
     
     def _generate_headers(self):
         """Generate headers for the POST request."""
@@ -18,19 +16,20 @@ class EmailClient:
         }
         return headers
 
-    def send_email(self, from_email, from_name, to_email, subject, text, category):
+    def send_email(self):
         """Send an email using the Mailtrap API."""
+
         data = {
             'from': {
-                'email': from_email,
-                'name': from_name
+                'email': Config.MAIL_FROM,
+                'name': 'Mailtrap Test'
             },
             'to': [
-                {'email': to_email}
+                {'email': Config.MAIL_TO}
             ],
-            'subject': subject,
-            'text': text,
-            'category': category
+            'subject': 'You are awesome!',
+            'text': 'Congrats for sending test email with Mailtrap!',
+            'category': 'Integration Test'
         }
         
         headers = self._generate_headers()
@@ -41,15 +40,3 @@ class EmailClient:
         else:
             print(f"Failed to send email. Status code: {response.status_code}")
             print("Response:", response.text)
-
-# Usage example
-if __name__ == "__main__":
-    email_client = EmailClient()
-    email_client.send_email(
-        from_email=getenv('FROM_EMAIL'),
-        from_name='Mailtrap Test',
-        to_email=getenv('TO_EMAIL'),
-        subject='You are awesome!',
-        text='Congrats for sending test email with Mailtrap!',
-        category='Integration Test'
-    )

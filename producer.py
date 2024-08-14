@@ -1,26 +1,22 @@
+#!/usr/bin/env python
 import pika
-import json
+from config import Config
 
-# Connect to RabbitMQ server
-connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+# Initialize RabbitMQ connection and declare queue
+connection = pika.BlockingConnection(
+    pika.ConnectionParameters(host=Config.QUEUE_HOST)
+    )
 channel = connection.channel()
+channel.queue_declare(queue=Config.QUEUE_NAME, durable=True)
 
-# Declare a queue
-channel.queue_declare(queue='email_queue')
+# Publish message
+channel.basic_publish(
+    exchange='',
+    routing_key= Config.QUEUE_NAME,
+    body="Hello World!",
+    properties=pika.BasicProperties(
+        delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE  # Make message persistent
+    ))
 
-def send_email_notification(recipient, subject, body):
-    message = {
-        'recipient': recipient,
-        'subject': subject,
-        'body': body
-    }
-    channel.basic_publish(exchange='',
-                          routing_key='email_queue',
-                          body=json.dumps(message))
-    print(" [x] Sent email notification to %s" % recipient)
-
-# Example usage
-send_email_notification('test@example.com', 'Test Subject', 'This is a test email body.')
-
-# Close the connection
+print(" [producer] Sent message")
 connection.close()
