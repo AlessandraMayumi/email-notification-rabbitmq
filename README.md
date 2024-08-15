@@ -1,7 +1,3 @@
-# Project
-
-This is a study on how to use `RabbitMQ` to send an email notification.
-
 ## References
 project: git@github.com:AlessandraMayumi/email-notification-rabbitmq.git
 
@@ -9,7 +5,27 @@ message broker: https://www.rabbitmq.com/tutorials/tutorial-two-python
 
 email provider: https://mailtrap.io/home
 
-## Overview
+# Automating Email Notifications with RabbitMQ and Python
+
+This is a study on how to use `RabbitMQ` to send an email notification.
+
+1. Producer:
+- Publishes messages to a RabbitMQ queue.
+- Uses pika to connect to RabbitMQ.
+
+2. RabbitMQ:
+- Acts as a message broker, storing messages in the queue until consumed.
+
+3. Consumer:
+- Listens to the RabbitMQ queue.
+- Upon receiving a message, it invokes EmailClient to send an email.
+- Acknowledges the message after processing.
+
+4. EmailClient:
+- Sends an email using the Mailtrap API.
+- Configured via Config for API URL, keys, and email details.
+
+## Step-by-Step Execution
 
 1. Start RabbitMQ server if it's not running.
 2. Run the consumer script to start listening for messages.
@@ -65,3 +81,7 @@ docker ps -a
 docker stop [CONTAINER_ID]
 docker rm [CONTAINER_ID]
 ```
+
+TODO: Unit Tests
+https://dev.to/bshadmehr/testing-rabbitmqconsumerbase-class-l7b
+https://github.com/ClearcodeHQ/pytest-rabbitmq/blob/main/tests/test_rabbitmq.py
